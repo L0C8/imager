@@ -17,6 +17,67 @@ public class Gui extends javax.swing.JFrame {
      */
     public Gui() {
         initComponents();
+        setupMenu();
+    }
+
+    private java.awt.image.BufferedImage currentImage = null;
+    private String currentPath = null;
+
+    private void setupMenu() {
+        javax.swing.JMenuBar menubar = new javax.swing.JMenuBar();
+
+        javax.swing.JMenu fileMenu = new javax.swing.JMenu("File");
+        javax.swing.JMenuItem openItem = new javax.swing.JMenuItem("Open...");
+        openItem.addActionListener(e -> {
+            javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
+            int rv = fc.showOpenDialog(this);
+            if (rv == javax.swing.JFileChooser.APPROVE_OPTION) {
+                java.io.File f = fc.getSelectedFile();
+                try {
+                    currentImage = imager.Editor.Dithering.loadImage(f.getAbsolutePath());
+                    currentPath = f.getAbsolutePath();
+                    javax.swing.JOptionPane.showMessageDialog(this, "Loaded: " + f.getName());
+                } catch (java.io.IOException ex) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Failed to load: " + ex.getMessage());
+                }
+            }
+        });
+        fileMenu.add(openItem);
+        javax.swing.JMenuItem exitItem = new javax.swing.JMenuItem("Exit");
+        exitItem.addActionListener(e -> System.exit(0));
+        fileMenu.add(exitItem);
+
+        javax.swing.JMenu resizeMenu = new javax.swing.JMenu("Resize");
+        javax.swing.JMenuItem r1 = new javax.swing.JMenuItem("1/5 (20%)");
+        r1.addActionListener(e -> doResize(0.2, "1-5"));
+        javax.swing.JMenuItem r2 = new javax.swing.JMenuItem("1/2 (50%)");
+        r2.addActionListener(e -> doResize(0.5, "1-2"));
+        javax.swing.JMenuItem r3 = new javax.swing.JMenuItem("2/3 (66%)");
+        r3.addActionListener(e -> doResize(2.0/3.0, "2-3"));
+        javax.swing.JMenuItem rOrig = new javax.swing.JMenuItem("Original (100%)");
+        rOrig.addActionListener(e -> doResize(1.0, "orig"));
+        resizeMenu.add(r1);
+        resizeMenu.add(r2);
+        resizeMenu.add(r3);
+        resizeMenu.add(rOrig);
+
+        menubar.add(fileMenu);
+        menubar.add(resizeMenu);
+        this.setJMenuBar(menubar);
+    }
+
+    private void doResize(double scale, String tag) {
+        if (currentImage == null || currentPath == null) {
+            javax.swing.JOptionPane.showMessageDialog(this, "No image loaded. Use File -> Open first.");
+            return;
+        }
+        try {
+            java.awt.image.BufferedImage out = imager.Editor.Dithering.resize(currentImage, scale);
+            imager.Editor.Dithering.saveImage(out, currentPath, "resized_" + tag);
+            javax.swing.JOptionPane.showMessageDialog(this, "Resized and saved (scale=" + scale + ")");
+        } catch (Exception ex) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Resize failed: " + ex.getMessage());
+        }
     }
 
     /**

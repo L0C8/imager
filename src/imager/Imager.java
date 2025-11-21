@@ -25,6 +25,22 @@ public class Imager {
             BufferedImage src = Dithering.loadImage(path);
             BufferedImage out = null;
             String methodName = "out";
+
+            System.out.print("Enter scale (decimal multiplier e.g. 0.5, 1.0, 2.0, 5, default 1): ");
+            String scaleInput = in.nextLine().trim();
+            double scale = 1.0;
+            if (!scaleInput.isEmpty()) {
+                try {
+                    scale = parseScale(scaleInput);
+                } catch (Exception ex) {
+                    System.out.println("Invalid scale, using 1.0");
+                    scale = 1.0;
+                }
+            }
+            if (scale <= 0) scale = 1.0;
+            if (scale != 1.0) {
+                src = Dithering.resize(src, scale);
+            }
             switch (choice) {
                 case 1:
                     System.out.print("Enter threshold 0-255 (default 128): ");
@@ -58,6 +74,9 @@ public class Imager {
             }
 
             if (out != null) {
+                if (scale != 1.0) {
+                    methodName = methodName + "_resized_" + ((int) Math.round(scale * 100)) + "pct";
+                }
                 Dithering.saveImage(out, path, methodName);
             }
 
@@ -67,6 +86,12 @@ public class Imager {
         }
 
         in.close();
+    }
+
+    private static double parseScale(String s) {
+        if (s == null || s.isEmpty()) return 1.0;
+        s = s.trim();
+        return Double.parseDouble(s);
     }
     
 }

@@ -133,4 +133,16 @@ public class Dithering {
 		return dst;
 	}
 
+	public static BufferedImage resize(BufferedImage src, double scale) {
+		if (scale <= 0) throw new IllegalArgumentException("scale must be > 0");
+		int w = (int) Math.max(1, Math.round(src.getWidth() * scale));
+		int h = (int) Math.max(1, Math.round(src.getHeight() * scale));
+		BufferedImage dst = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		java.awt.Image tmp = src.getScaledInstance(w, h, java.awt.Image.SCALE_SMOOTH);
+		java.awt.Graphics2D g2 = dst.createGraphics();
+		g2.drawImage(tmp, 0, 0, null);
+		g2.dispose();
+		return dst;
+	}
+
 }
