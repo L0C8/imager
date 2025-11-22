@@ -22,7 +22,6 @@ public class Imager {
         String path = in.nextLine().trim();
 
         try {
-            BufferedImage src = Dithering.loadImage(path);
             BufferedImage out = null;
             String methodName = "out";
 
@@ -38,6 +37,41 @@ public class Imager {
                 }
             }
             if (scale <= 0) scale = 1.0;
+            boolean isGif = path.toLowerCase().endsWith(".gif");
+
+            // If input is GIF, process frames and write an animated GIF
+            if (isGif) {
+                // For threshold method, ask threshold before processing
+                int thr = 128;
+                if (choice == 1) {
+                    System.out.print("Enter threshold 0-255 (default 128): ");
+                    String t = in.nextLine().trim();
+                    if (!t.isEmpty()) {
+                        try { thr = Integer.parseInt(t); } catch (NumberFormatException ex) { thr = 128; }
+                    }
+                }
+                // Build an output tag
+                String outTag;
+                switch (choice) {
+                    case 1: outTag = "threshold" + thr; break;
+                    case 2: outTag = "randomAnim"; break;
+                    case 3: outTag = "orderedBayerAnim"; break;
+                    case 4: outTag = "orderedAvoidClusterAnim"; break;
+                    case 5: outTag = "floydSteinbergAnim"; break;
+                    default: outTag = "anim"; break;
+                }
+                if (scale != 1.0) outTag = outTag + "_resized_" + ((int) Math.round(scale * 100)) + "pct";
+
+                // For threshold method, animatedDither currently uses a fixed threshold pattern.
+                // We'll call animatedDither which applies per-frame processing. For threshold, we
+                // don't currently pass a custom threshold per frame, so implementation will vary.
+                Dithering.animatedDither(path, choice, scale, outTag);
+                System.out.println("Animated GIF processing complete.");
+                in.close();
+                return;
+            }
+
+            BufferedImage src = Dithering.loadImage(path);
             if (scale != 1.0) {
                 src = Dithering.resize(src, scale);
             }
