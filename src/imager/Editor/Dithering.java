@@ -219,12 +219,6 @@ public class Dithering {
 
         ImageWriteParam params = writer.getDefaultWriteParam();
 
-        // Use first frame type for metadata base
-        // use frame image type when creating per-frame metadata below
-        // skip merging arbitrary global metadata; GIF writer implementations are strict about
-        // the native metadata tree. We'll configure looping using stream metadata below.
-
-            // Configure stream metadata for looping (ApplicationExtensions) and use it when starting sequence
             IIOMetadata streamMeta = writer.getDefaultStreamMetadata(params);
             if (streamMeta != null) {
                 String streamFormat = streamMeta.getNativeMetadataFormatName();
